@@ -2,6 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import { CarModel } from "../models/car.model";
 import { getRecommendationsBySlug } from "../service/recommendation.service";
 import { ApiError } from "../utils/api";
+import path from "node:path";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3, S3_BUCKET, generatePublicUrl } from "../config/s3";
 
 type UploadedFile = {
   filename: string;
@@ -12,6 +15,12 @@ type UploadedFile = {
 };
 
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const safeBase = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
 // GET /api/cars?featured=true&active=true&q=lambo&type=SUV&seats=4&page=1&limit=12&sort=pricePerDay:asc
 export const getCars = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -24,9 +33,7 @@ export const getCars = async (req: Request, res: Response, next: NextFunction): 
 
     const filter: any = {};
 
-    // active
     if (active === "all") {
-      // admin wants all
     } else if (active === "true") filter.isActive = true;
     else if (active === "false") filter.isActive = false;
     else filter.isActive = true;
@@ -369,16 +376,20 @@ export const adminSetCarFeatured = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const adminAttachUploadedImages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const adminAttachUploadedImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
-
     const car = await CarModel.findById(id);
     if (!car) return next(new ApiError(404, "Car not found"));
 
     const slug = car.slug;
-    const files = (((req as any).files ?? []) as UploadedFile[]);
+    const files = ((req as any).files ?? []) as any[];
 
+    // Получаем массив альтернативных текстов из запроса, если передан JSON‑строкой
     const altsRaw = (req.body as any)?.alts;
     let alts: string[] = [];
     if (typeof altsRaw === "string") {
@@ -389,26 +400,45 @@ export const adminAttachUploadedImages = async (req: Request, res: Response, nex
       }
     }
 
-    const newItems = files.map((f, idx) => ({
-      url: `/cars/${slug}/${f.filename}`,
-      alt: alts[idx] || "",
-    }));
+    // Загружаем каждый файл в S3 и формируем массив newItems
+    const newItems: { url: string; alt: string }[] = [];
+    for (let idx = 0; idx < files.length; idx++) {
+      const f = files[idx];
+      // определяем расширение и базовое имя файла
+      const ext  = path.extname(f.originalname || "").toLowerCase() || ".png";
+      const base = safeBase(path.basename(f.originalname || "image", ext)) || "image";
+      const fileName = `${base}${ext}`;
+      const key = `cars/${slug}/${fileName}`;
 
+      // загрузка в S3
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: S3_BUCKET,
+          Key: key,
+          Body: f.buffer,
+          ContentType: f.mimetype,
+        })
+      );
+
+      // формирование публичного URL
+      const url = generatePublicUrl(key);
+      newItems.push({ url, alt: alts[idx] || "" });
+    }
+
+    // Если у автомобиля ещё нет thumbnailUrl, берём первую картинку как превью
     let galleryItems = newItems;
-
     if (!car.thumbnailUrl && newItems.length) {
       car.thumbnailUrl = newItems[0].url;
       galleryItems = newItems.slice(1);
     }
 
-    
+    // Удаляем дубликаты URL: gallery + thumbnail
     const existing = new Set<string>([
       car.thumbnailUrl || "",
       ...(car.gallery || []).map((g: any) => g?.url).filter(Boolean),
     ]);
 
     const toPush = galleryItems.filter((x) => x?.url && !existing.has(x.url));
-
     car.gallery.push(...toPush);
 
     await car.save();
