@@ -10,7 +10,6 @@ export const JWT_EXPIRES_IN: string | number = process.env.JWT_EXPIRES_IN || "7d
 export const JWT_COOKIE_SECURE: boolean =
   (process.env.JWT_COOKIE_SECURE ?? "false") === "true";
 
-// ✅ SMTP (Yandex)
 export const SMTP_HOST = process.env.SMTP_HOST ?? "smtp.yandex.ru";
 export const SMTP_PORT = Number(process.env.SMTP_PORT ?? 465);
 export const SMTP_USER = process.env.SMTP_USER ?? "";
@@ -22,6 +21,12 @@ export const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? 6
 export const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? 100);
 
 export const ASSETS_ORIGIN = process.env.ASSETS_ORIGIN 
+
+export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID ?? "";
+export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY ?? "";
+export const AWS_REGION = process.env.AWS_REGION ?? "ru-central1";
+export const AWS_S3_BUCKET = process.env.AWS_S3_BUCKET ?? "";
+export const AWS_ENDPOINT = process.env.AWS_ENDPOINT ?? "https://storage.yandexcloud.net";
 
 
 
@@ -42,5 +47,10 @@ export const env = {
   SMTP_USER,
   SMTP_PASS,
   TO_EMAIL,
-  ASSETS_ORIGIN
+  ASSETS_ORIGIN,
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  AWS_REGION,
+  AWS_S3_BUCKET,
+  AWS_ENDPOINT,
 };
