@@ -1,0 +1,47 @@
+@import url('https://fonts.google.com/specimen/Figtree');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+}
+
+
+@layer base {
+  body {
+    @apply bg-bg;
+    @apply font-inter;
+  }
+
+  html{
+    scroll-behavior: smooth;
+  }
+}
+
+.myScroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.myScroll::-webkit-scrollbar-track {
+  background: rgb(184, 29, 29);
+  border-radius: 999px;
+}
+
+.myScroll::-webkit-scrollbar-thumb {
+  background: #b81d1d;
+  border-radius: 999px;
+  border: 2px solid #b81d1d;
+  background-clip: padding-box;
+}
+
+.myScroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.32);
+  background-clip: padding-box;
+}
+
+.myScroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.22) rgba(255,255,255,0.06);
+}

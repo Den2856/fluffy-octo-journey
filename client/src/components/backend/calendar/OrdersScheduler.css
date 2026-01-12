@@ -1,0 +1,51 @@
+.orders-scheduler .fc {
+  --fc-border-color: rgba(255,255,255,.10);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: rgba(255,255,255,.04);
+  --fc-today-bg-color: rgba(255,255,255,.04);
+  --fc-now-indicator-color: rgba(255,255,255,.35);
+  font-size: 13px;
+}
+
+.orders-scheduler .fc .fc-scrollgrid,
+.orders-scheduler .fc .fc-scrollgrid-section > td,
+.orders-scheduler .fc .fc-timegrid-axis,
+.orders-scheduler .fc .fc-timegrid-slot,
+.orders-scheduler .fc .fc-col-header-cell {
+  border-color: rgba(255,255,255,.10);
+}
+
+.orders-scheduler .fc .fc-timegrid-axis-cushion,
+.orders-scheduler .fc .fc-timegrid-slot-label-cushion {
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+}
+
+.orders-scheduler .fc .fc-col-header-cell-cushion {
+  color: rgba(255,255,255,.75);
+  font-weight: 600;
+}
+
+.orders-scheduler .fc .fc-timegrid-slot {
+  background: rgba(0,0,0,.10);
+}
+
+.orders-scheduler .fc .fc-daygrid-day-frame,
+.orders-scheduler .fc .fc-timegrid-col-frame {
+  background: transparent;
+}
+
+.orders-scheduler .fc .fc-event {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.orders-scheduler .fc .fc-event:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.orders-scheduler .fc .fc-timegrid-event-harness {
+  margin-inline: 2px;
+}
