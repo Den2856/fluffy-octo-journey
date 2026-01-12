@@ -61,7 +61,10 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   if (!email) throw new ApiError(400, "email is required");
 
   const user = await UserModel.findOne({ email: String(email).toLowerCase() });
-  if (!user) return res.json(ok({ message: "If account exists, reset link was sent" }));
+  if (!user) {
+    res.json(ok({ message: "If account exists, reset link was sent" }));
+    return;
+  }
 
   const rawToken = crypto.randomBytes(32).toString("hex");
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
