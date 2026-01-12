@@ -29,6 +29,6 @@
   },
   "include":[
     "src",
-    "scripts"
-, "../server/src/scripts/dump_ids.js", "../server/src/lib/mailer.ts"  ]
+    "scripts", 
+  ]
 }
