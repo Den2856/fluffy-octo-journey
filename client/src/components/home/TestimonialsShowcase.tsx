@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { testimonials } from "../../data/testiomonial.data"
+import { AssetImage } from "../ui/AssetImage"
 
 export default function TestimonialsShowcase() {
   const items = useMemo(() => testimonials, [])
@@ -73,7 +74,7 @@ export default function TestimonialsShowcase() {
                 }
                 aria-label={`Open testimonial ${i + 1}`}
               >
-                <img
+                <AssetImage
                   src={thumbSrc}
                   alt={it.image.alt ?? it.author}
                   className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.03]"

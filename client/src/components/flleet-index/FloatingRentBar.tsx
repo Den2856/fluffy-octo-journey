@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { AssetImage } from "../ui/AssetImage";
 
 type Props = {
   watchRef: React.RefObject<Element | null>;
@@ -70,7 +71,7 @@ export default function FloatingRentBar({ watchRef, stopRef, to, make, model, pr
       <span className="pointer-events-none absolute left-0 top-0 z-20 h-[5px] w-full bg-primary origin-left"/>
 
       <Link to={to} className="flex items-center gap-4 border border-white/10 bg-dark-100 p-4">
-        <img
+        <AssetImage
           src={toPublicSrc(thumbnailUrl)}
           alt={`${make} ${model}`}
           className="h-12 w-12 object-cover"

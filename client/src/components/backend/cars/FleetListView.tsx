@@ -1,3 +1,4 @@
+import { AssetImage } from "../../ui/AssetImage";
 import { b, statusLabelByKey, statusPillListByKey, type FleetViewProps } from "./fleetView.shared";
 
 export default function FleetListView({
@@ -43,7 +44,7 @@ export default function FleetListView({
         const thumbNode =
           {
             true: (
-              <img
+              <AssetImage
                 src={thumbUrl}
                 alt={car.slug || "car"}
                 className="h-full w-full object-cover"

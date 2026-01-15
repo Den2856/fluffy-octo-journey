@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import { AssetImage } from "../ui/AssetImage";
 
 type Slide = { url: string; alt?: string };
 const toPublicSrc = (p: string) => (p.startsWith("/") ? p : `/${p}`);
@@ -31,7 +32,7 @@ export default function AutoCarousel({ slides, intervalMs = 3800,}: { slides: Sl
             {slides.map((s, i) => (
               <div key={s.url + i} className="flex-[0_0_100%] min-w-0">
                 <div className="relative w-full">
-                  <img
+                  <AssetImage
                     src={toPublicSrc(s.url)}
                     alt={s.alt ?? `slide-${i}`}
                     className="h-[260px] w-full object-fit"

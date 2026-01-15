@@ -3,6 +3,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FILLER_IMAGES } from "../../data/fillers";
 import { buildSlides, buildSlidesReplacingFrom, type Slide } from "../../lib/buildSlides";
+import { AssetImage } from "../ui/AssetImage";
 
 type GalleryItem = { url: string; alt?: string };
 
@@ -95,7 +96,7 @@ export default function FleetSlider({
             {computedSlides.map((s, i) => (
               <div key={`${s.url}-${i}`} className="min-w-0 flex-[0_0_100%]">
                 <div className="relative size-full">
-                  <img
+                  <AssetImage
                     src={s.url} // НЕ трогаем второй раз, buildSlides уже нормализует
                     alt={s.alt ?? title}
                     className="h-full w-full object-contain"

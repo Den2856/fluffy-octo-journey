@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { Car, CarChips, CarSpecs, CarUpsertPayload, OverviewBlock } from "../../../types/admin.car.types";
 import { cn, inputCls, IntegerField, NumberField, SectionCard, TextField } from "../../ui/CarEditorUI";
+import { AssetImage } from "../../ui/AssetImage";
 
 export function BasicsSection({
   payload,
@@ -308,7 +309,7 @@ export function ImagesSection({
           {images.map((img, idx) => (
             <div key={idx} className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
               <div className="aspect-[4/3] w-full">
-                <img src={img.url} alt={img.alt || ""} className="h-full w-full object-cover" />
+                <AssetImage src={img.url} alt={img.alt || ""} className="h-full w-full object-cover" />
               </div>
               {img.alt ? <div className="px-2 py-1 text-[11px] text-white/55">{img.alt}</div> : null}
             </div>

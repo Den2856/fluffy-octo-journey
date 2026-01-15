@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AssetImage } from "../ui/AssetImage";
 
 type StepStage = {
   id: string;
@@ -160,7 +161,7 @@ function StepHeroPanel({ steps, activeIndex, title, description, imageSrc, corne
 
         <div className="mt-6">
           <div className="relative overflow-hidden border border-white/10">
-            <img
+            <AssetImage
               src={imageSrc}
               alt=""
               className="absolute inset-0 h-full w-full object-cover"

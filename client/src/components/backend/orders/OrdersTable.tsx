@@ -4,6 +4,7 @@ import { API, type Order, type SortKey } from "../../../types/adminOrders.types"
 import { Search } from "lucide-react";
 import { Select, type Option } from "../../ui/CustomSelect";
 import Pagination from "../../ui/Pagination";
+import { AssetImage } from "../../ui/AssetImage";
 
 const PAGE_SIZE = 15;
 
@@ -382,7 +383,7 @@ export default function OrdersTable() {
                         <div className="flex items-center gap-3 min-w-[320px]">
                           <div className="h-10 w-16 overflow-hidden rounded-xl border border-white/10 bg-white/5">
                             {car.thumb ? (
-                              <img
+                              <AssetImage
                                 src={car.thumb}
                                 alt={car.title}
                                 className="h-full w-full object-cover"

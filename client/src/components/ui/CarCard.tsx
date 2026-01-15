@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import type { CarCardDTO } from "../../types/car.types";
 import { Users, Gauge, Settings2, ArrowRight } from "lucide-react";
+import { AssetImage } from "./AssetImage";
 
 function formatPrice(amount: number, currency: string) {
   try {
@@ -31,13 +32,13 @@ export default function CarCard({ car }: { car: CarCardDTO } ) {
       <div className="relative aspect-[16/10] overflow-hidden">
 
         <Link to={`/fleet/${car.slug}`}>
-          <img
+          <AssetImage
             src={car.thumbnailUrl}
             alt={`${car.make} ${title}`}
             className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300 group-hover:opacity-0"
             loading="lazy"
           />
-          <img
+          <AssetImage
             src={`${car.gallery?.[0].url}`}
             alt={`${car.make} ${title}`}
             className="h-full w-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"

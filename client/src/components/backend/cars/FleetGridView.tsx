@@ -1,6 +1,7 @@
 import { type ElementType, type ReactNode } from "react";
 import { Users, Settings2, Gauge, Fuel, type LucideProps } from "lucide-react";
 import { b, statusLabelByKey, statusPillGridByKey, type FleetViewProps } from "./fleetView.shared";
+import { AssetImage } from "../../ui/AssetImage";
 
 type SpecChipProps = {
   Icon: ElementType<LucideProps>;
@@ -33,7 +34,7 @@ export default function FleetGridView({items, ghostBtn, openEdit, handleDelete, 
         const thumbNode =
           {
             true: (
-              <img
+              <AssetImage
                 src={thumbUrl}
                 alt={car.slug || "car"}
                 className="h-full w-full object-cover"
