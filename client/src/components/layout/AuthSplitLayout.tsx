@@ -29,9 +29,9 @@ export default function AuthSplitLayout({ title, subtitle, children, backTo = "/
 
   const defaultSlides: Slide[] = useMemo(
     () => [
-      { image: "/cars/range-rover-sport-p400/1.png", headline: "Luxury rides,", sub: "Seamless experience" },
-      { image: "/cars/mercedes-e-300/1.png", headline: "Premium fleet,", sub: "Ready on demand" },
-      { image: "/cars/mclaren-720s/1.png", headline: "Elite service,", sub: "24/7 support" },
+      { image: "https://fluffy-octo-journey-k27p.onrender.com/api/v1//cars/range-rover-sport-p400/1.png", headline: "Luxury rides,", sub: "Seamless experience" },
+      { image: "https://fluffy-octo-journey-k27p.onrender.com/api/v1//cars/mercedes-e-300/1.png", headline: "Premium fleet,", sub: "Ready on demand" },
+      { image: "https://fluffy-octo-journey-k27p.onrender.com/api/v1//cars/mclaren-720s/1.png", headline: "Elite service,", sub: "24/7 support" },
     ],
     []
   );

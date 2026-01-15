@@ -48,9 +48,6 @@ export async function adminUploadCarImages(id: string, files: File[], alts?: str
   files.forEach((f) => fd.append("files", f));
   if (alts?.length) fd.append("alts", JSON.stringify(alts));
 
-  const { data } = await http.post<Car>(`/cars/${id}/upload`, fd, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-
+  const { data } = await http.post<Car>(`/cars/${id}/upload`, fd);
   return data;
 }
