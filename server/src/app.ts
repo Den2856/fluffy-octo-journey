@@ -10,6 +10,9 @@ import rateLimit from 'express-rate-limit';
 import { env } from './config/env';
 import { apiRouter } from './routes/index';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { s3 } from "./config/s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import type { Readable } from "node:stream";
 
 export function createServer() {
   const app = express();
@@ -36,6 +39,25 @@ export function createServer() {
       legacyHeaders: false
     })
   );
+
+  app.get("/cars/:slug/:filename", async (req, res, next) => {
+    const { slug, filename } = req.params;
+    const key = `cars/${slug}/${filename}`;
+    try {
+      const result = await s3.send(
+        new GetObjectCommand({
+          Bucket: env.AWS_S3_BUCKET!,
+          Key: key,
+        })
+      );
+      if (result.ContentType) res.setHeader("Content-Type", result.ContentType);
+      // result.Body — это ReadableStream
+      (result.Body as Readable).pipe(res);
+    } catch (err) {
+      // если объекта нет — отдаём 404
+      next();
+    }
+});
 
   app.use("/public", express.static(publicDir));
   app.use('/uploads', express.static(path.resolve(env.UPLOAD_DIR)));

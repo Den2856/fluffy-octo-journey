@@ -431,13 +431,12 @@ export const adminAttachUploadedImages = async (req: any, res: any, next: any): 
         contentType: f.mimetype || "application/octet-stream",
       });
 
-      const url = generatePublicUrl(key);
-      newItems.push({ url, alt: alts[idx] || "" });
+      newItems.push({ url: key, alt: alts[idx] || "" });
     }
 
     let galleryItems = newItems;
     if (!car.thumbnailUrl && newItems.length) {
-      car.thumbnailUrl = newItems[0].url;
+      car.thumbnailUrl = newItems[0].url;  // здесь также сохраняем key, а не полный URL
       galleryItems = newItems.slice(1);
     }
 
