@@ -74,5 +74,7 @@ export function createServer() {
   app.use(notFound);
   app.use(errorHandler);
 
+  app.set("trust proxy", true);
+
   return app;
 }
