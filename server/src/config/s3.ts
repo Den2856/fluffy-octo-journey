@@ -3,7 +3,6 @@ import { env } from "./env";
 
 export const S3_BUCKET = env.AWS_S3_BUCKET;
 
-
 export const s3 = new S3Client({
   region: env.AWS_REGION,
   endpoint: env.AWS_ENDPOINT,
@@ -14,29 +13,28 @@ export const s3 = new S3Client({
   },
 });
 
-/**
- * Загружает файл в бакет S3.
- * @param key путь/имя файла внутри бакета, например `cars/tesla-model-s/image.jpg`
- * @param body буфер файла
- * @param contentType MIME‑тип
- */
-export async function uploadToS3(key: string, body: Buffer, contentType: string): Promise<void> {
+export async function uploadToS3(params: {
+  key: string;
+  body: Buffer;
+  contentType: string;
+  cacheControl?: string;
+}) {
+  if (!S3_BUCKET) throw new Error("AWS_S3_BUCKET is empty");
   await s3.send(
     new PutObjectCommand({
       Bucket: S3_BUCKET,
-      Key: key,
-      Body: body,
-      ContentType: contentType,
+      Key: params.key,
+      Body: params.body,
+      ContentType: params.contentType,
+      CacheControl: params.cacheControl ?? "public, max-age=31536000, immutable",
+      ...(env.AWS_PUBLIC_READ ? { ACL: "public-read" as const } : {}),
     })
   );
 }
 
-/**
- * Формирует публичный URL к файлу. Если переменная ASSETS_ORIGIN задана
- */
 export function generatePublicUrl(key: string): string {
-  const base = env.ASSETS_ORIGIN
-    ? env.ASSETS_ORIGIN.replace(/\/$/, "")
-    : `${env.AWS_ENDPOINT.replace(/\/$/, "")}/${env.AWS_S3_BUCKET}`;
-  return `${base}/${key}`;
+  const base = (env.ASSETS_ORIGIN || "").replace(/\/$/, "");
+  if (base) return `${base}/${key.replace(/^\//, "")}`;
+  const ep = env.AWS_ENDPOINT.replace(/\/$/, "");
+  return `${ep}/${env.AWS_S3_BUCKET}/${key.replace(/^\//, "")}`;
 }

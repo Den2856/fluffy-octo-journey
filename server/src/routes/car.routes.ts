@@ -32,7 +32,7 @@ router.post("/", requireAuth, requireAdmin, adminCreateCar);
 router.patch("/:id", requireAuth, requireAdmin, adminUpdateCar);
 router.patch("/:id/active", requireAuth, requireAdmin, adminSetCarActive);
 router.patch("/:id/featured", requireAuth, requireAdmin, adminSetCarFeatured);
-router.post("/:id/upload", requireAuth, requireAdmin, upload.array("files", 12), adminAttachUploadedImages);
+router.post("/:id/upload", requireAuth, requireAdmin, upload.fields([{ name: "files", maxCount: 12 }, { name: "files[]", maxCount: 12 },]), adminAttachUploadedImages );
 
 router.get("/count", requireAuth, async (_req, res) => {
   const activeCount = await CarModel.countDocuments({ isActive: true });

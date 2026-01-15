@@ -4,7 +4,7 @@ import { getRecommendationsBySlug } from "../service/recommendation.service";
 import { ApiError } from "../utils/api";
 import path from "node:path";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3, S3_BUCKET, generatePublicUrl } from "../config/s3";
+import { s3, S3_BUCKET, generatePublicUrl, uploadToS3 } from "../config/s3";
 
 type UploadedFile = {
   filename: string;
@@ -376,21 +376,25 @@ export const adminSetCarFeatured = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const adminAttachUploadedImages = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const adminAttachUploadedImages = async (req: any, res: any, next: any): Promise<void> => {
   try {
     const { id } = req.params;
+
     const car = await CarModel.findById(id);
     if (!car) return next(new ApiError(404, "Car not found"));
 
     const slug = car.slug;
-    const files = ((req as any).files ?? []) as any[];
 
-    // Получаем массив альтернативных текстов из запроса, если передан JSON‑строкой
-    const altsRaw = (req.body as any)?.alts;
+    // multer.fields -> req.files это объект: { "files": [...], "files[]": [...] }
+    const filesMap = req.files ?? {};
+    const files: any[] = Array.isArray(filesMap)
+      ? filesMap
+      : Object.values(filesMap).flatMap((x: any) => (Array.isArray(x) ? x : []));
+
+    if (!files.length) return next(new ApiError(400, "No files received (expected field 'files')"));
+
+    // alts может прийти JSON-строкой
+    const altsRaw = req.body?.alts;
     let alts: string[] = [];
     if (typeof altsRaw === "string") {
       try {
@@ -400,39 +404,43 @@ export const adminAttachUploadedImages = async (
       }
     }
 
-    // Загружаем каждый файл в S3 и формируем массив newItems
+    const safeBase = (name: string) =>
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
     const newItems: { url: string; alt: string }[] = [];
+
     for (let idx = 0; idx < files.length; idx++) {
       const f = files[idx];
-      // определяем расширение и базовое имя файла
-      const ext  = path.extname(f.originalname || "").toLowerCase() || ".png";
+
+      const ext = path.extname(f.originalname || "").toLowerCase() || ".png";
       const base = safeBase(path.basename(f.originalname || "image", ext)) || "image";
-      const fileName = `${base}${ext}`;
+
+      const uniq = `${Date.now()}-${idx}`;
+      const fileName = `${base}-${uniq}${ext}`;
       const key = `cars/${slug}/${fileName}`;
 
-      // загрузка в S3
-      await s3.send(
-        new PutObjectCommand({
-          Bucket: S3_BUCKET,
-          Key: key,
-          Body: f.buffer,
-          ContentType: f.mimetype,
-        })
-      );
+      const buf: Buffer | undefined = f.buffer;
+      if (!buf || !Buffer.isBuffer(buf)) return next(new ApiError(400, "Invalid file buffer"));
 
-      // формирование публичного URL
+      await uploadToS3({
+        key,
+        body: buf,
+        contentType: f.mimetype || "application/octet-stream",
+      });
+
       const url = generatePublicUrl(key);
       newItems.push({ url, alt: alts[idx] || "" });
     }
 
-    // Если у автомобиля ещё нет thumbnailUrl, берём первую картинку как превью
     let galleryItems = newItems;
     if (!car.thumbnailUrl && newItems.length) {
       car.thumbnailUrl = newItems[0].url;
       galleryItems = newItems.slice(1);
     }
 
-    // Удаляем дубликаты URL: gallery + thumbnail
     const existing = new Set<string>([
       car.thumbnailUrl || "",
       ...(car.gallery || []).map((g: any) => g?.url).filter(Boolean),
