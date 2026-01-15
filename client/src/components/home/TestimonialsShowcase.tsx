@@ -21,7 +21,7 @@ export default function TestimonialsShowcase() {
           <AnimatePresence mode="wait">
             <motion.img
               key={mainSrc}
-              src={`https://fluffy-octo-journey-k27p.onrender.com/api/v1/${mainSrc}`}
+              src={`https://fluffy-octo-journey-k27p.onrender.com/api/v1${mainSrc}`}
               alt={t.image.alt ?? ""}
               className="size-full object-cover object-right"
               initial={{ opacity: 0, scale: 1.02 }}
