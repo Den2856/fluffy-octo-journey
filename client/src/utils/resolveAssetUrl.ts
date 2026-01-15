@@ -1,4 +1,4 @@
-const API_ORIGIN = normalizeOrigin((import.meta.env.VITE_API_ORIGIN as string) || "");
+const API_ORIGIN = normalizeOrigin((import.meta.env.VITE_API_URL as string) || "");
 const ASSETS_ORIGIN = normalizeOrigin((import.meta.env.VITE_ASSETS_ORIGIN as string) || "");
 
 const ASSET_PREFIXES = ["cars/", "uploads/", "images/", "static/", "thumbs/"];
