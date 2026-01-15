@@ -376,27 +376,22 @@ export const adminSetCarFeatured = async (req: Request, res: Response, next: Nex
   }
 };
 
+
 export const adminAttachUploadedImages = async (req: any, res: any, next: any): Promise<void> => {
   try {
     const { id } = req.params;
-
     const car = await CarModel.findById(id);
-    if (!car) return next(new ApiError(404, "Car not found"));
+    if (!car) return next(new ApiError(404, 'Car not found'));
 
     const slug = car.slug;
-
-    // multer.fields -> req.files это объект: { "files": [...], "files[]": [...] }
     const filesMap = req.files ?? {};
-    const files: any[] = Array.isArray(filesMap)
-      ? filesMap
-      : Object.values(filesMap).flatMap((x: any) => (Array.isArray(x) ? x : []));
-
+    const files: any[] = Array.isArray(filesMap) ? filesMap : Object.values(filesMap).flatMap((x: any) => (Array.isArray(x) ? x : []));
     if (!files.length) return next(new ApiError(400, "No files received (expected field 'files')"));
 
-    // alts может прийти JSON-строкой
+    // alts может прийти строкой
     const altsRaw = req.body?.alts;
     let alts: string[] = [];
-    if (typeof altsRaw === "string") {
+    if (typeof altsRaw === 'string') {
       try {
         alts = JSON.parse(altsRaw);
       } catch {
@@ -404,47 +399,35 @@ export const adminAttachUploadedImages = async (req: any, res: any, next: any): 
       }
     }
 
-    const safeBase = (name: string) =>
-      name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-
     const newItems: { url: string; alt: string }[] = [];
-
     for (let idx = 0; idx < files.length; idx++) {
       const f = files[idx];
-
-      const ext = path.extname(f.originalname || "").toLowerCase() || ".png";
-      const base = safeBase(path.basename(f.originalname || "image", ext)) || "image";
-
+      const ext = path.extname(f.originalname || '').toLowerCase() || '.png';
+      const base = safeBase(path.basename(f.originalname || 'image', ext)) || 'image';
       const uniq = `${Date.now()}-${idx}`;
       const fileName = `${base}-${uniq}${ext}`;
       const key = `cars/${slug}/${fileName}`;
-
       const buf: Buffer | undefined = f.buffer;
-      if (!buf || !Buffer.isBuffer(buf)) return next(new ApiError(400, "Invalid file buffer"));
-
+      if (!buf || !Buffer.isBuffer(buf)) return next(new ApiError(400, 'Invalid file buffer'));
       await uploadToS3({
         key,
         body: buf,
-        contentType: f.mimetype || "application/octet-stream",
+        contentType: f.mimetype || 'application/octet-stream',
       });
-
-      newItems.push({ url: key, alt: alts[idx] || "" });
+      // сохраняем ключ, не абсолютный URL
+      newItems.push({ url: key, alt: alts[idx] || '' });
     }
 
     let galleryItems = newItems;
     if (!car.thumbnailUrl && newItems.length) {
-      car.thumbnailUrl = newItems[0].url;  // здесь также сохраняем key, а не полный URL
+      car.thumbnailUrl = newItems[0].url;
       galleryItems = newItems.slice(1);
     }
 
     const existing = new Set<string>([
-      car.thumbnailUrl || "",
+      car.thumbnailUrl || '',
       ...(car.gallery || []).map((g: any) => g?.url).filter(Boolean),
     ]);
-
     const toPush = galleryItems.filter((x) => x?.url && !existing.has(x.url));
     car.gallery.push(...toPush);
 
@@ -454,4 +437,4 @@ export const adminAttachUploadedImages = async (req: any, res: any, next: any): 
   } catch (err) {
     next(err);
   }
-};
+}

@@ -1,5 +1,5 @@
-import React from "react";
-import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import React from 'react';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
   src?: string | null;

@@ -36,11 +36,12 @@ export function createServer() {
       windowMs: env.RATE_LIMIT_WINDOW_MS,
       max: env.RATE_LIMIT_MAX,
       standardHeaders: true,
-      legacyHeaders: false
-    })
+      legacyHeaders: false,
+    }),
   );
 
-  app.get("/cars/:slug/:filename", async (req, res, next) => {
+  // Проксируем запросы /cars/:slug/:filename к S3
+  app.get('/cars/:slug/:filename', async (req, res, next) => {
     const { slug, filename } = req.params;
     const key = `cars/${slug}/${filename}`;
     try {
@@ -48,22 +49,25 @@ export function createServer() {
         new GetObjectCommand({
           Bucket: env.AWS_S3_BUCKET!,
           Key: key,
-        })
+        }),
       );
-      if (result.ContentType) res.setHeader("Content-Type", result.ContentType);
-      // result.Body — это ReadableStream
+      if (result.ContentType) res.setHeader('Content-Type', result.ContentType);
       (result.Body as Readable).pipe(res);
     } catch (err) {
-      // если объекта нет — отдаём 404
+      // если объекта нет, отдаём 404
       next();
     }
-});
+  });
 
-  app.use("/public", express.static(publicDir));
+  // Дополнительные статики (опционально)
+  app.use('/public', express.static(publicDir));
   app.use('/uploads', express.static(path.resolve(env.UPLOAD_DIR)));
+
+  // API
   app.use('/api/v1', apiRouter);
   app.use('/api', apiRouter);
 
+  // 404 и обработчик ошибок
   app.use(notFound);
   app.use(errorHandler);
 
