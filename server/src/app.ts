@@ -10,6 +10,7 @@ import rateLimit from "express-rate-limit";
 import { env } from "./config/env";
 import { apiRouter } from "./routes/index";
 import { errorHandler, notFound } from "./middleware/errorHandler";
+
 import { s3 } from "./config/s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import type { Readable } from "node:stream";
@@ -17,11 +18,16 @@ import type { Readable } from "node:stream";
 export function createServer() {
   const app = express();
 
-  // ✅ ВАЖНО для Render/любого reverse proxy (иначе express-rate-limit падает на X-Forwarded-For)
-  // Render обычно имеет один прокси-хоп, поэтому 1 — правильное значение.
+  // ✅ Render / reverse proxy
   app.set("trust proxy", 1);
 
-  app.use(helmet());
+  // ✅ ВАЖНО: иначе браузер будет блокать картинки cross-origin (Vercel -> Render)
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" }, // <--- КЛЮЧЕВО
+    })
+  );
+
   app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
   app.use(compression());
   app.use(cookieParser());
@@ -36,7 +42,6 @@ export function createServer() {
 
   if (env.NODE_ENV !== "production") app.use(morgan("dev"));
 
-  // ✅ rate limit после trust proxy
   app.use(
     "/api",
     rateLimit({
@@ -47,9 +52,8 @@ export function createServer() {
     })
   );
 
-  // ✅ Прокси картинок из S3 через бек
-  // /cars/<slug>/<file> (без /api/v1)
-  app.get("/cars/:slug/:filename", async (req, res, next) => {
+  // ====== PROXY S3 -> BACKEND PATH ======
+  async function serveCarImage(req: express.Request, res: express.Response, next: express.NextFunction) {
     const { slug, filename } = req.params;
     const key = `cars/${slug}/${filename}`;
 
@@ -62,12 +66,22 @@ export function createServer() {
       );
 
       if (result.ContentType) res.setHeader("Content-Type", result.ContentType);
+      // чтобы браузер кэшировал
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+
       (result.Body as Readable).pipe(res);
     } catch {
-      next(); // 404 дальше
+      // если ключа нет — пусть будет нормальный 404 (а не блок NotSameOrigin)
+      res.status(404).json({ success: false, error: "Not Found", key });
     }
-  });
+  }
 
+  // ✅ поддерживаем ВСЕ варианты URL, которые у тебя сейчас встречаются
+  app.get("/cars/:slug/:filename", serveCarImage);
+  app.get("/api/v1/cars/:slug/:filename", serveCarImage);
+  app.get("/api/cars/:slug/:filename", serveCarImage);
+
+  // API
   app.use("/api/v1", apiRouter);
   app.use("/api", apiRouter);
 
