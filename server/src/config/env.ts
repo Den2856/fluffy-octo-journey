@@ -25,13 +25,11 @@ export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY ?? "";
 export const AWS_REGION = process.env.AWS_REGION ?? "ru-central1";
 export const AWS_S3_BUCKET = process.env.AWS_S3_BUCKET ?? "";
 
+// raw endpoint может содержать имя бакета (например https://storage.yandexcloud.net/fluffy-octo-journey)
 const RAW_ENDPOINT = process.env.AWS_ENDPOINT ?? "https://storage.yandexcloud.net";
 
-/**
- * Нормализуем endpoint: выкидываем path (/bucket), чтобы не было дубля бакета и 0B в облаке.
- * Например:
- *  - https://storage.yandexcloud.net/fluffy-octo-journey  -> https://storage.yandexcloud.net
- *  - https://fluffy-octo-journey.storage.yandexcloud.net -> https://fluffy-octo-journey.storage.yandexcloud.net
+/** 
+ * Нормализуем endpoint: выкидываем путь (/bucket), чтобы SDK не дублировал имя бакета 
  */
 export const AWS_ENDPOINT = (() => {
   try {
@@ -42,11 +40,14 @@ export const AWS_ENDPOINT = (() => {
   }
 })();
 
+/** 
+ * Заливаем объекты публично? true → добавляется ACL: public-read 
+ */
 export const AWS_PUBLIC_READ = (process.env.AWS_PUBLIC_READ ?? "true") === "true";
 
-/**
- * База для публичных URL.
- * Если не задана, по умолчанию строим: `${AWS_ENDPOINT}/${AWS_S3_BUCKET}`
+/** 
+ * База для генерации публичных ссылок. Если не указана,
+ * берётся `${AWS_ENDPOINT}/${AWS_S3_BUCKET}` 
  */
 export const ASSETS_ORIGIN =
   (process.env.ASSETS_ORIGIN ?? "").trim() ||

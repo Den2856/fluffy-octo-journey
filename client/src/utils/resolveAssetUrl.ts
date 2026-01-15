@@ -5,7 +5,6 @@ const ASSET_PREFIXES = ["cars/", "uploads/", "images/", "static/", "thumbs/"];
 
 export function resolveAssetUrl(input?: string | null): string {
   if (!input) return "";
-
   const url = String(input).trim();
   if (!url) return "";
 

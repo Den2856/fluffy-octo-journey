@@ -13,6 +13,12 @@ export const s3 = new S3Client({
   },
 });
 
+/**
+ * Загрузка файла в S3. 
+ * key — путь вида cars/slug/filename.jpg (без starting slash).
+ * body — Buffer.
+ * contentType — MIME.
+ */
 export async function uploadToS3(params: {
   key: string;
   body: Buffer;
@@ -32,6 +38,11 @@ export async function uploadToS3(params: {
   );
 }
 
+/**
+ * Генерация публичной ссылки.
+ * Если env.ASSETS_ORIGIN определена — используем её;
+ * иначе собираем из endpoint+bucket.
+ */
 export function generatePublicUrl(key: string): string {
   const base = (env.ASSETS_ORIGIN || "").replace(/\/$/, "");
   if (base) return `${base}/${key.replace(/^\//, "")}`;
