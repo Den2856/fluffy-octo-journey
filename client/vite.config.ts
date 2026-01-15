@@ -11,10 +11,15 @@ export default defineConfig({
         secure: false,
       },
       "/cars": {
-        target: "http://localhost:4013",
+        target: process.env.VITE_API_URL,
         changeOrigin: true,
         secure: false,
       },
+      "/public": {
+        target: process.env.VITE_API_URL,
+        changeOrigin: true,
+        secure: false,
+      }
     },
   },
 });
